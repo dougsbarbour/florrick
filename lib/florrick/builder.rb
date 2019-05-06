@@ -1,7 +1,7 @@
 module Florrick
   class Builder
 
-    VALID_EXPORT_TYPES = [String, Numeric, Date, Time, Array]
+    VALID_EXPORT_TYPES = [String, Numeric, Date, Time, Array, Enumerable]
 
     attr_reader :original_string, :objects
 
@@ -15,7 +15,7 @@ module Florrick
       string.gsub(/(\{\{\s*(\w[\w\.\(\,\"\'\)]+)(?>\ ?\|\ ?([\w\-\+\ \!\?\[\]\(\)]+))?\s*\}\})/) do
         original_string = $1
         fallback_string = $3 ? $3.strip : nil
-        parts = $2.downcase.scan(/(?<=^|\.)(?:\w+\((?:[^\)]+)*\)|[^\.]+)(?=\.|$)/x)
+        parts = $2.downcase.scan(/(?<=^|\.)(?:\w+(?:\([^)]+\))|[^.]+)(?=\.|$)/x)
         final_string = nil
         previous_object = @objects[parts.shift.to_sym]
 

@@ -125,10 +125,10 @@ class StringInterpolationTest < Test::Unit::TestCase
     Florrick::Formatter.add 'to_s', [String] do |value|
       value.to_s
     end
-    Florrick::Formatter.add 'collect', [Array] do |array, argument|
+    Florrick::Formatter.add 'collect', [Array, Enumerable] do |array, argument|
       array.map {|each| Florrick.convert("{{ each.#{argument} }}", :each => each)}
     end
-    Florrick::Formatter.add 'collect_arrays', [Array] do |array, arguments|
+    Florrick::Formatter.add 'collect_arrays', [Array, Enumerable] do |array, arguments|
       array.map do |each|
         arguments.split(',').map do |argument|
           if argument.strip[0] == '"'
