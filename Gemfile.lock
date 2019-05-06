@@ -37,3 +37,6 @@ DEPENDENCIES
   rake
   sqlite3
   test-unit
+
+BUNDLED WITH
+   1.16.3
