@@ -12,10 +12,10 @@ module Florrick
 
     def output
       string = @original_string.dup
-      string.gsub(/(\{\{\s*([\w+\.]+)(?>\ ?\|\ ?([\w\-\+\ \!\?\[\]\(\)]+))?\s*\}\})/) do
+      string.gsub(/(\{\{\s*(\w[\w\.\(\,\"\'\)]+)(?>\ ?\|\ ?([\w\-\+\ \!\?\[\]\(\)]+))?\s*\}\})/) do
         original_string = $1
         fallback_string = $3 ? $3.strip : nil
-        parts = $2.downcase.split('.')
+        parts = $2.downcase.scan(/(?<=^|\.)(?:\w+\((?:[^\)]+)*\)|[^\.]+)(?=\.|$)/x)
         final_string = nil
         previous_object = @objects[parts.shift.to_sym]
 
@@ -44,7 +44,8 @@ module Florrick
                 final_string = fallback_string || original_string
               end
             elsif VALID_EXPORT_TYPES.any? { |t| previous_object.is_a?(t)}
-              previous_object = Florrick::Formatter.convert(var, previous_object)
+              matcher = var.match(/(?<fname>\w+)(?:\((?<args>[^\)]+)\))?/x)
+              previous_object = Florrick::Formatter.convert(matcher[:fname], previous_object, matcher[:args])
             else
               # does not respond to string_interpolation_value_for and isn't a valid object,
               # we can't do anything here just return the passed value.

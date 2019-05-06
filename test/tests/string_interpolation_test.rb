@@ -1,3 +1,5 @@
+require 'test_helper'
+
 class StringInterpolationTest < Test::Unit::TestCase
 
   def setup
@@ -117,6 +119,32 @@ class StringInterpolationTest < Test::Unit::TestCase
   def test_uppercase_in_variables
     assert_equal "United Kingdom", Florrick.convert('{{ COUNTRY.NAME }}', :country => @country1)
     assert_equal "No country", Florrick.convert("{{ USER.COUNTRY.NAME | No country }}", :user => @user3)
+  end
+
+  def test_formatter_arguments
+    Florrick::Formatter.add 'to_s', [String] do |value|
+      value.to_s
+    end
+    Florrick::Formatter.add 'collect', [Array] do |array, argument|
+      array.map {|each| Florrick.convert("{{ each.#{argument} }}", :each => each)}
+    end
+    Florrick::Formatter.add 'collect_arrays', [Array] do |array, arguments|
+      array.map do |each|
+        arguments.split(',').map do |argument|
+          if argument.strip[0] == '"'
+            argument.strip.tr('"', '')
+          else
+            Florrick.convert("{{ each.#{argument} }}", :each => each)
+          end
+        end
+      end
+    end
+
+    assert_equal 'london, paris, new york, poole', Florrick.convert("{{user.places.collect(downcase)}}", :user => @user1)
+    assert_equal 'London, lowered, london, Paris, lowered, paris, New York, lowered, new york, Poole, lowered, poole',
+                 Florrick.convert('{{user.places.collect_arrays(to_s,"lowered",downcase)}}', :user => @user1)
+    assert_equal 'London lowered london, Paris lowered paris, New York lowered new york, and Poole lowered poole',
+                 Florrick.convert('{{user.places.collect_arrays(to_s,"lowered",downcase).collect(join_with_spaces).to_sentence}}', :user => @user1)
   end
 
 end

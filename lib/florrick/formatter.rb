@@ -13,9 +13,9 @@ module Florrick
       end
 
       # Run a string through a given formatter and return the result. If not possible, return false.
-      def convert(name, value)
+      def convert(name, value, argument = nil)
         if formatter = formatters[name.to_sym]
-          formatter.convert(value)
+          formatter.convert(value, argument)
         else
           false
         end
@@ -26,9 +26,9 @@ module Florrick
       @name, @types, @block = name, types, block
     end
 
-    def convert(value)
+    def convert(value, argument = nil)
       if @types.empty? || @types.any? { |t| value.is_a?(t)}
-        @block.call(value)
+        @block.call(value, argument)
       else
         false
       end
